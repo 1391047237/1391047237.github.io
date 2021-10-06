@@ -1,0 +1,122 @@
+namespace MySQLDemo
+{
+    publicpartialclassForm1 : Form
+    {
+
+        //变量设置
+        privatestring SQL_ConnectStr = "server =  127.0.0.1;port=3306;user=root;password=root;database=demo;Charset=utf8;";
+        public MySqlConnection MySqlConnection;
+        MySqlDataAdapter mySqlDataAdapter;
+        DataSet dataSet;
+        publicForm1()
+        {
+            InitializeComponent();
+        }
+
+        privatevoid Form1_Load(object sender, EventArgs e)
+        {
+            Database_connection();
+            Database_Select_test(MySqlConnection);
+            Database_Select_All(MySqlConnection);
+          
+        }
+
+        publicvoid Database_connection() //数据库连接函数
+        {
+            try
+            {
+                MySqlConnection = new MySqlConnection(SQL_ConnectStr);
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+            }
+            finally
+            {
+                Console.WriteLine("数据库连接成功");
+            }
+        }
+
+        publicvoid Database_Select_test(MySqlConnection mySqlConnection) //测试查询输出
+        {
+            try
+            {
+                if (mySqlConnection != null)
+                    mySqlConnection.Open();  //打开通道
+                Console.WriteLine("查询通道打开");
+
+                string sql_select = "SELECT * FROM user ";
+                MySqlCommand mySqlCommand = new MySqlCommand(sql_select,  mySqlConnection);
+                MySqlDataReader reader = mySqlCommand.ExecuteReader();
+                while (reader.Read())
+                {
+                    string id = reader.GetString("id");
+                    string name = reader.GetString("name");
+                    string password = reader.GetString("password");
+                    string data = reader.GetString("data");
+                    Console.WriteLine(id + name + password + data);
+                }
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+            }
+            finally
+            {
+                mySqlConnection.Close();
+            }
+
+        }
+
+        publicvoid Database_Select_All(MySqlConnection mySqlConnection)
+        {
+            try
+            {
+                if (mySqlConnection != null)
+                    mySqlConnection.Open();  //打开通道
+                Console.WriteLine("查询通道打开1");
+                string sql_select = "SELECT * FROM user";
+                MySqlCommand mySqlCommand = new MySqlCommand(sql_select,  mySqlConnection);
+                //将查询结果绑定微dataview数据源
+                mySqlDataAdapter = new MySqlDataAdapter(mySqlCommand);
+                dataSet = new DataSet();
+                mySqlDataAdapter.Fill(dataSet,"user");
+                dataGridView1.DataSource = dataSet;
+                dataGridView1.DataMember = "user";
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+            }
+            finally
+            {
+                mySqlConnection.Close();
+            }
+        }
+        privatevoid bt_Refresh_Click(object sender, EventArgs e)
+        {
+            dataSet.Tables["user"].Clear();
+            mySqlDataAdapter.Fill(dataSet,"user");
+        }
+
+        privatevoid bt_SubmitAndSave_Click(object sender, EventArgs e)
+        {
+            MySqlCommandBuilder mySqlCommandBuilder = new  MySqlCommandBuilder(mySqlDataAdapter);
+            mySqlDataAdapter.Update(dataSet,"user");
+        }
+
+        privatevoid backgroundWorker1_DoWork(object sender,  System.ComponentModel.DoWorkEventArgs e)
+        {
+
+        }
+
+        privatevoid button1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        privatevoid dataGridView1_CellContentClick(object sender,  DataGridViewCellEventArgs e)
+        {
+
+        }
+    }
